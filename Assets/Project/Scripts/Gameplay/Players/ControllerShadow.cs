@@ -6,8 +6,10 @@ public class ControllerShadow : MonoBehaviour
 
 	// Public properties
 	[HideInInspector] public IInteractable interactor;
-	
+
 	// Private properties
+	[Header("Parameters")]
+
 	[Header("Movement")]
 	[SerializeField] float moveSpeed = 10f;
 
@@ -18,16 +20,31 @@ public class ControllerShadow : MonoBehaviour
 	[Header("Ladders")]
 	[SerializeField] float climbSpeed = 6f;
 
-	[Header("Technical")]
 	[Header("Ground Check")]
 	[SerializeField] Transform groundCheckTr;
-	[SerializeField] LayerMask groundLayer;
+	[SerializeField] LayerMask groundLayerMask;
+	[SerializeField] LayerMask safeGroundLayerMask;
 	[SerializeField] Vector3 groundCheckBoxSize;
+
+	[Header("Reset")]
+	[SerializeField, Tooltip("Time it takes for SHADOW to reset to a safe position when dying")] float resetDuration = 0.5f;
+	[SerializeField, Tooltip("Curve to follow when SHADOW is resetting")] AnimationCurve resetCurve;
+	[SerializeField, Tooltip("Curve to scale SHADOW when he is resetting")] AnimationCurve resetScaleCurve;
+	[SerializeField, Tooltip("VFX Object to activate when SHADOW is resetting")] GameObject resetVfxObject;
+
+	[Header("Technical")]
+	[SerializeField] Transform mesh;
 
 	bool _grounded;
 	int _inLadder;
 	bool _climbing;
 	Rigidbody rb;
+
+	// Reset
+	bool _isResetting = false;
+	float _resetElapsedTime = 0f;
+	Vector3 _resetStartPosition;
+	Vector3 _lastSafePosition;
 
 	private void Awake()
 	{
@@ -41,26 +58,54 @@ public class ControllerShadow : MonoBehaviour
 	{
 		rb = GetComponent<Rigidbody>();
 		rb.useGravity = false;
+		_isResetting = false;
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		_grounded = IsGrounded();
-		//Debug.Log("grounded : " + grounded);
-
-		HandleMove();
-
-		HandleJump();
-
-		HandleClimbing();
-
-		HandleInteract();
+		if (_isResetting)
+			HandleReset();
+		else
+		{
+			GroundCheck();
+			HandleMove();
+			HandleJump();
+			HandleClimbing();
+			HandleInteract();
+		}
 	}
 
 	void FixedUpdate()
 	{
-		HandleGravity();
+		if (!_isResetting)
+			HandleGravity();
+	}
+
+	void HandleReset()
+	{
+		_resetElapsedTime += Time.deltaTime;
+
+		float percentage = _resetElapsedTime / resetDuration;
+
+		rb.MovePosition(Vector3.Lerp(_resetStartPosition, _lastSafePosition, resetCurve.Evaluate(percentage)));
+
+		float s = resetScaleCurve.Evaluate(percentage);
+		mesh.localScale = new(s, s, s);
+
+		
+
+
+		if (_resetElapsedTime > resetDuration)
+		{
+			_resetElapsedTime = 0;
+			mesh.localScale = Vector3.one;
+			rb.linearVelocity = Vector3.zero;
+			GetComponent<Collider>().enabled = true;
+			resetVfxObject.SetActive(false);
+			resetVfxObject.GetComponentInChildren<TrailRenderer>().emitting = false;
+			_isResetting = false;
+		}
 	}
 
 	void HandleMove()
@@ -76,7 +121,7 @@ public class ControllerShadow : MonoBehaviour
 		{
 			_climbing = false;
 			InputActionShadow.Instance.Jump = false;
-			rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+			rb.AddForce(Vector3.up * jumpForce * rb.mass, ForceMode.Impulse);
 		}
 	}
 	void HandleGravity()
@@ -124,9 +169,25 @@ public class ControllerShadow : MonoBehaviour
 		}
 	}
 
-	bool IsGrounded()
+	void GroundCheck()
 	{
-		return Physics.CheckBox(groundCheckTr.position, groundCheckBoxSize / 2, Quaternion.identity, groundLayer);
+		_grounded = Physics.CheckBox(groundCheckTr.position, groundCheckBoxSize / 2, Quaternion.identity, groundLayerMask);
+
+		Vector3 tryPos = new(Mathf.FloorToInt(transform.position.x) + 0.5f, groundCheckTr.position.y, 0f);
+
+		if (_grounded && Physics.CheckBox(tryPos, groundCheckBoxSize / 2, Quaternion.identity, safeGroundLayerMask))
+			_lastSafePosition = tryPos + Vector3.up;
+	}
+
+	public void Kill()
+	{
+		_resetStartPosition = transform.position;
+		GetComponent<Collider>().enabled = false;
+		resetVfxObject.SetActive(true);
+		TrailRenderer tr = resetVfxObject.GetComponentInChildren<TrailRenderer>();
+		tr.Clear();
+		tr.emitting = true;
+		_isResetting = true;
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -166,5 +227,15 @@ public class ControllerShadow : MonoBehaviour
 		Gizmos.color = Color.red;
 
 		Gizmos.DrawWireCube(groundCheckTr.position, groundCheckBoxSize);
+
+		Gizmos.color = Color.blue;
+		Gizmos.DrawSphere(_lastSafePosition, 0.2f);
 	}
+
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+	static void ResetSingleton()
+	{
+		Instance = null;
+	}
+
 }

@@ -74,4 +74,11 @@ public class ControllerLight : MonoBehaviour
 		if (_currentHoveringTime >= 1f / hoveringFrequency)
 			_currentHoveringTime = 0f;
 	}
+
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+	static void ResetSingleton()
+	{
+		Instance = null;
+	}
+
 }

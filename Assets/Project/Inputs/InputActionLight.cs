@@ -19,13 +19,15 @@ public class InputActionLight : MonoBehaviour
 			Destroy(gameObject);
 	}
 
-	private void Update()
-	{
-		
-	}
-
 	public void OnMove(InputValue value)
 	{
 		move = value.Get<Vector2>();
 	}
+
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+	static void ResetSingleton()
+	{
+		Instance = null;
+	}
+
 }

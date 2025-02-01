@@ -44,4 +44,10 @@ public class InputActionShadow : MonoBehaviour
 	{
 		_interact = value.Get<float>() > 0f;
 	}
+
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+	static void ResetSingleton()
+	{
+		Instance = null;
+	}
 }
