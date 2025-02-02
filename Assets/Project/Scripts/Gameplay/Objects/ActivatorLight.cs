@@ -1,23 +1,12 @@
 using UnityEngine;
 
-public class ActivatorLight : MonoBehaviour
+public class ActivatorLight : Activator
 {
 	[Header("Parameter")]
-	[SerializeField] GameObject activable;
 	[SerializeField] bool activateOnce;
 
 	[Header("Technical")]
 	[SerializeField] MeshRenderer activatorLightMeshRenderer;
-	[SerializeField] Material activatorLightMaterialTrue;
-	[SerializeField] Material activatorLightMaterialFalse;
-
-	bool _activated;
-	IActivable _activable;
-
-	void Start()
-	{
-		_activable = activable.GetComponent<IActivable>();
-	}
 
 
 	private void OnTriggerEnter(Collider other)
@@ -25,13 +14,10 @@ public class ActivatorLight : MonoBehaviour
 		if (other.gameObject.layer == 10)
 		{
 			if (activateOnce && !_activated)
-			{
-				_activated = true;
-				_activable.Activate(_activated);
-			}
+				Activate(true);
 			else
-				_activable.Activate(true);
-			activatorLightMeshRenderer.material = activatorLightMaterialTrue;
+				Activate(true);
+			activatorLightMeshRenderer.material = GameManager.Instance.GetActivatedMaterial(true);
 		}
 	}
 
@@ -41,8 +27,8 @@ public class ActivatorLight : MonoBehaviour
 		{
 			if (!activateOnce)
 			{
-				_activable.Activate(false);
-				activatorLightMeshRenderer.material = activatorLightMaterialFalse;
+				Activate(false);
+				activatorLightMeshRenderer.material = GameManager.Instance.GetActivatedMaterial(false);
 			}
 		}
 	}

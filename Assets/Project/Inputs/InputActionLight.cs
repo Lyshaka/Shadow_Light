@@ -6,10 +6,12 @@ public class InputActionLight : MonoBehaviour
 	[HideInInspector] public static InputActionLight Instance {  get; private set; }
 
 	// Properties
-	Vector2 move;
+	Vector2 _move;
+	float _interact;
 
 	// Attributes
-	public Vector2 Move => move;
+	public Vector2 Move => _move;
+	public float Interact => _interact;
 
 	private void Awake()
 	{
@@ -21,7 +23,12 @@ public class InputActionLight : MonoBehaviour
 
 	public void OnMove(InputValue value)
 	{
-		move = value.Get<Vector2>();
+		_move = value.Get<Vector2>();
+	}
+
+	public void OnInteract(InputValue value)
+	{
+		_interact = value.Get<float>();
 	}
 
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

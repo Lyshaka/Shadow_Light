@@ -20,12 +20,12 @@ TagManager:
   - GoThroughLight
   - GoThroughShadow
   - GoThroughLightShadow
+  - ProximityCheckLight
   - 
   - 
   - 
   - 
-  - 
-  - 
+  - NotGround
   - 
   - 
   - 

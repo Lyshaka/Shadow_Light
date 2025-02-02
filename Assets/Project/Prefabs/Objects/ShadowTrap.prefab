@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3917056248398844374}
+  - component: {fileID: 3945975606997529464}
   - component: {fileID: 27509446519201500}
   - component: {fileID: 8384220747599053861}
   m_Layer: 7
@@ -27,12 +28,33 @@ Transform:
   m_GameObject: {fileID: 495871347666522411}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.1, z: 0}
+  m_LocalPosition: {x: 0, y: -0.4, z: 0}
   m_LocalScale: {x: 1, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 807113317677472445}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &3945975606997529464
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495871347666522411}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!33 &27509446519201500
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -613,7 +635,7 @@ GameObject:
   - component: {fileID: 3299953286174869204}
   - component: {fileID: 3284354974568156567}
   - component: {fileID: 7798684682978388486}
-  m_Layer: 7
+  m_Layer: 20
   m_Name: SpikeCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -763,7 +785,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6643693094348344166}
-  m_Layer: 0
+  m_Layer: 20
   m_Name: Spikes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -779,7 +801,7 @@ Transform:
   m_GameObject: {fileID: 6563679342741982020}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.1, z: 0}
+  m_LocalPosition: {x: 0, y: -0.4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -891,8 +913,8 @@ GameObject:
   m_Component:
   - component: {fileID: 807113317677472445}
   - component: {fileID: 7874161333818824124}
-  - component: {fileID: 6793159629047432372}
-  m_Layer: 7
+  - component: {fileID: 3957516516521915023}
+  m_Layer: 20
   m_Name: ShadowTrap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -928,10 +950,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef70d405209efdb489829ea2261c0d50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  distanceToDeactivate: 3
   spikes: {fileID: 6643693094348344166}
   coll: {fileID: 7798684682978388486}
---- !u!65 &6793159629047432372
-BoxCollider:
+--- !u!135 &3957516516521915023
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -945,12 +968,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 0.2, z: 1}
-  m_Center: {x: 0, y: 0.1, z: 0}
+  m_Radius: 5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8851677834034956924
 GameObject:
   m_ObjectHideFlags: 0

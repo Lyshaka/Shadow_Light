@@ -10,15 +10,25 @@ public class ControllerLight : MonoBehaviour
 	[SerializeField] float acceleration = 10f;
 	[SerializeField] float deceleration = 10f;
 
-	[Header("Hovering")]
-	[SerializeField] Transform hoveringTransform;
-	[SerializeField] AnimationCurve hoveringCurve;
-	[SerializeField] float hoveringFrequency = 1f;
-	[SerializeField] float hoveringDelta = 0.2f;
+
+	[Header("Grow")]
+	[SerializeField] float growDuration = 0.5f;
+	[SerializeField] float growMultiplicator = 1.5f;
+	[SerializeField] Light pointLight;
+
+	[Header("Technical")]
+	[SerializeField] Transform mesh;
+
 
 	// Private properties
 	Rigidbody rb;
-	float _currentHoveringTime;
+
+	// Grow
+	Vector3 _originalSize;
+	float _originalLightRange;
+	float _originalLightIntensity;
+	float _growElapsedTime;
+
 
 	private void Awake()
 	{
@@ -32,16 +42,15 @@ public class ControllerLight : MonoBehaviour
 	{
 		rb = GetComponent<Rigidbody>();
 		rb.useGravity = false;
-	}
-
-	void Update()
-	{
-		HandleHovering();
+		_originalSize = mesh.localScale;
+		_originalLightRange = pointLight.range;
+		_originalLightIntensity = pointLight.intensity;
 	}
 
 	void FixedUpdate()
 	{
 		HandleMove();
+		HandleInteract();
 	}
 
 	void HandleMove()
@@ -65,14 +74,27 @@ public class ControllerLight : MonoBehaviour
 		}
 	}
 
-	void HandleHovering()
+	void HandleInteract()
 	{
+		if (InputActionLight.Instance.Interact > 0f)
+		{
+			mesh.localScale = _originalSize * growMultiplicator;
+			pointLight.range = _originalLightRange * growMultiplicator * growMultiplicator;
+			pointLight.intensity = _originalLightIntensity * growMultiplicator * growMultiplicator;
+		}
+		else
+		{
+			mesh.localScale = _originalSize;
+			pointLight.range = _originalLightRange;
+			pointLight.intensity = _originalLightIntensity;
+		}
+	}
 
-		hoveringTransform.localPosition = new Vector3(0f, (hoveringCurve.Evaluate(_currentHoveringTime * hoveringFrequency) * hoveringDelta) - hoveringDelta / 2f, 0f);
-
-		_currentHoveringTime += Time.deltaTime;
-		if (_currentHoveringTime >= 1f / hoveringFrequency)
-			_currentHoveringTime = 0f;
+	void SetLightSize(float percentage)
+	{
+		mesh.localScale = _originalSize * growMultiplicator * percentage;
+		pointLight.range = _originalLightRange * growMultiplicator * growMultiplicator * percentage;
+		pointLight.intensity = _originalLightIntensity * growMultiplicator * growMultiplicator * percentage;
 	}
 
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

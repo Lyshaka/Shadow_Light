@@ -11,7 +11,9 @@ public class ControllerShadow : MonoBehaviour
 	[Header("Parameters")]
 
 	[Header("Movement")]
-	[SerializeField] float moveSpeed = 10f;
+	[SerializeField] float maxSpeed = 10f;
+	[SerializeField] float acceleration = 20f;
+	[SerializeField] float deceleration = 30f;
 
 	[Header("Jump")]
 	[SerializeField] float jumpForce = 50f;
@@ -40,6 +42,9 @@ public class ControllerShadow : MonoBehaviour
 	bool _climbing;
 	Rigidbody rb;
 
+	// Movement
+	float _currentHVelocity;
+
 	// Reset
 	bool _isResetting = false;
 	float _resetElapsedTime = 0f;
@@ -61,7 +66,6 @@ public class ControllerShadow : MonoBehaviour
 		_isResetting = false;
 	}
 
-	// Update is called once per frame
 	void Update()
 	{
 		if (_isResetting)
@@ -110,9 +114,26 @@ public class ControllerShadow : MonoBehaviour
 
 	void HandleMove()
 	{
+		
+		if (Mathf.Abs(InputActionShadow.Instance.Move) > 0f)
+		{
+			_currentHVelocity += InputActionShadow.Instance.Move * Time.deltaTime * acceleration;
+			_currentHVelocity = Mathf.Clamp( _currentHVelocity, -maxSpeed, maxSpeed);
+		}
+		else
+		{
+			if (Mathf.Abs(_currentHVelocity) > 0f)
+				_currentHVelocity -= Time.deltaTime * deceleration * Mathf.Sign(_currentHVelocity);
+			else
+				_currentHVelocity = 0f;
+		}
+
 		Vector3 velocity = rb.linearVelocity;
-		velocity.x = InputActionShadow.Instance.Move * moveSpeed;
+		velocity.x = _currentHVelocity;
 		rb.linearVelocity = velocity;
+
+		// Rotate the sphere according to horizontal speed
+		mesh.eulerAngles -= new Vector3(0f, 0f, (velocity.x / (mesh.localScale.x * 0.5f)) * Time.deltaTime * Mathf.Rad2Deg);
 	}
 
 	void HandleJump()
@@ -182,6 +203,7 @@ public class ControllerShadow : MonoBehaviour
 	public void Kill()
 	{
 		_resetStartPosition = transform.position;
+		_currentHVelocity = 0f;
 		GetComponent<Collider>().enabled = false;
 		resetVfxObject.SetActive(true);
 		TrailRenderer tr = resetVfxObject.GetComponentInChildren<TrailRenderer>();

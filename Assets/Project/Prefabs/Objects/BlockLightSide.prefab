@@ -394,6 +394,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animationDuration: 0.2
+  activated: 0
   leftSide: {fileID: 2677385614379495019}
   rightSide: {fileID: 2394445698510346947}
   coll: {fileID: 9066064843299101941}
