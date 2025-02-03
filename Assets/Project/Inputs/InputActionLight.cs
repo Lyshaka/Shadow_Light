@@ -8,10 +8,12 @@ public class InputActionLight : MonoBehaviour
 	// Properties
 	Vector2 _move;
 	float _interact;
+	float _grow;
 
 	// Attributes
 	public Vector2 Move => _move;
 	public float Interact => _interact;
+	public float Grow => _grow;
 
 	private void Awake()
 	{
@@ -29,6 +31,11 @@ public class InputActionLight : MonoBehaviour
 	public void OnInteract(InputValue value)
 	{
 		_interact = value.Get<float>();
+	}
+
+	public void OnGrow(InputValue value)
+	{
+		_grow = value.Get<float>();
 	}
 
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

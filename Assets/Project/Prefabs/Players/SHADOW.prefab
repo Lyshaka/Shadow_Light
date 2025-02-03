@@ -5107,7 +5107,7 @@ MonoBehaviour:
   safeGroundLayerMask:
     serializedVersion: 2
     m_Bits: 9
-  groundCheckBoxSize: {x: 0.35, y: 0.05, z: 0.5}
+  groundCheckBoxSize: {x: 0.25, y: 0.05, z: 0.5}
   resetDuration: 0.5
   resetCurve:
     serializedVersion: 2
@@ -5363,8 +5363,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9bd303d0f09a23541b98f194a1c1262b, type: 2}
-  - {fileID: 2100000, guid: 75f73227b1b7bba46b09a37524ba5057, type: 2}
+  - {fileID: 2100000, guid: abe8f00d818f7d1489ed5afe40df5fd7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5410,7 +5409,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9006399786f6ae94f8bd8f371a36752d, type: 2}
+  - {fileID: 2100000, guid: f9cd1eced5179584daa12b3dd6c3c621, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

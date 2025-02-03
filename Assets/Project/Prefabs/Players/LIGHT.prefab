@@ -50,7 +50,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 1
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -261,7 +261,34 @@ MonoBehaviour:
   moveSpeedMax: 8
   acceleration: 40
   deceleration: 15
+  growDuration: 0.25
+  growCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   growMultiplicator: 1.5
+  pointLight: {fileID: 208809992904599096}
+  trailRenderer: {fileID: 6444000958169934706}
   mesh: {fileID: 3701746969696622431}
 --- !u!135 &8010595594347845907
 SphereCollider:

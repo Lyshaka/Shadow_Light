@@ -12,9 +12,11 @@ public class ControllerLight : MonoBehaviour
 
 
 	[Header("Grow")]
-	[SerializeField] float growDuration = 0.5f;
+	[SerializeField] float growDuration = 0.25f;
+	[SerializeField] AnimationCurve growCurve;
 	[SerializeField] float growMultiplicator = 1.5f;
 	[SerializeField] Light pointLight;
+	[SerializeField] TrailRenderer trailRenderer;
 
 	[Header("Technical")]
 	[SerializeField] Transform mesh;
@@ -28,6 +30,10 @@ public class ControllerLight : MonoBehaviour
 	float _originalLightRange;
 	float _originalLightIntensity;
 	float _growElapsedTime;
+	float _originalTrailSize;
+	bool _isGrowing;
+	bool _isGrown;
+
 
 
 	private void Awake()
@@ -45,18 +51,19 @@ public class ControllerLight : MonoBehaviour
 		_originalSize = mesh.localScale;
 		_originalLightRange = pointLight.range;
 		_originalLightIntensity = pointLight.intensity;
+		_originalTrailSize = trailRenderer.startWidth;
 	}
 
 	void FixedUpdate()
 	{
 		HandleMove();
-		HandleInteract();
+		HandleGrow();
 	}
 
 	void HandleMove()
 	{
 		Vector3 inputVelocity = new Vector3(InputActionLight.Instance.Move.x, InputActionLight.Instance.Move.y, 0f).normalized;
-		if (inputVelocity.magnitude > 0f)
+		if (inputVelocity.sqrMagnitude > 0f && !_isGrown)
 		{
 			rb.linearVelocity += acceleration * Time.fixedDeltaTime * inputVelocity;
 			rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, moveSpeedMax);
@@ -74,27 +81,51 @@ public class ControllerLight : MonoBehaviour
 		}
 	}
 
-	void HandleInteract()
+	void HandleGrow()
 	{
-		if (InputActionLight.Instance.Interact > 0f)
+		if (InputActionLight.Instance.Grow > 0f)
 		{
-			mesh.localScale = _originalSize * growMultiplicator;
-			pointLight.range = _originalLightRange * growMultiplicator * growMultiplicator;
-			pointLight.intensity = _originalLightIntensity * growMultiplicator * growMultiplicator;
+			if (_growElapsedTime < growDuration)
+			{
+				_growElapsedTime += Time.deltaTime;
+				_isGrowing = true;
+				_isGrown = true;
+			}
+			else
+			{
+				_growElapsedTime = growDuration;
+				_isGrowing = false;
+			}
 		}
 		else
 		{
-			mesh.localScale = _originalSize;
-			pointLight.range = _originalLightRange;
-			pointLight.intensity = _originalLightIntensity;
+			if (_growElapsedTime > 0f)
+			{
+				_growElapsedTime -= Time.deltaTime;
+				_isGrowing = true;
+				_isGrown = false;
+			}
+			else
+			{
+				_growElapsedTime = 0f;
+				_isGrowing = false;
+			}
+		}
+
+		if (_isGrowing)
+		{
+			SetLightSize(_growElapsedTime / growDuration);
 		}
 	}
 
 	void SetLightSize(float percentage)
 	{
-		mesh.localScale = _originalSize * growMultiplicator * percentage;
-		pointLight.range = _originalLightRange * growMultiplicator * growMultiplicator * percentage;
-		pointLight.intensity = _originalLightIntensity * growMultiplicator * growMultiplicator * percentage;
+		float mul = Mathf.Lerp(1f, growMultiplicator, percentage);
+
+		mesh.localScale = _originalSize * mul;
+		pointLight.range = _originalLightRange * mul * mul;
+		pointLight.intensity = _originalLightIntensity * mul* mul;
+		trailRenderer.startWidth = _originalTrailSize * mul;
 	}
 
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
