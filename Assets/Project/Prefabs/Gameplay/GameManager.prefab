@@ -59,7 +59,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0028ac085fa28ea4787d743d11dab0b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraDistanceMin: 20
+  cameraDistanceMin: 10
   cameraDistanceMax: 50
-  verticalOffset: 0
   smoothDampTime: 0.2
