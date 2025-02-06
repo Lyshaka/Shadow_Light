@@ -5095,7 +5095,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 8
-  acceleration: 40
+  acceleration: 60
   deceleration: 20
   jumpForce: 10
   gravityForce: 30

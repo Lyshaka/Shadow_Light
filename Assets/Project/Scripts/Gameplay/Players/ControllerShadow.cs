@@ -138,11 +138,14 @@ public class ControllerShadow : MonoBehaviour
 
 	void HandleJump()
 	{
-		if ((_grounded || _climbing) && InputActionShadow.Instance.Jump)
+		if (InputActionShadow.Instance.Jump)
 		{
-			_climbing = false;
 			InputActionShadow.Instance.Jump = false;
-			rb.AddForce(Vector3.up * jumpForce * rb.mass, ForceMode.Impulse);
+			if (_grounded || _climbing)
+			{
+				_climbing = false;
+				rb.AddForce(Vector3.up * jumpForce * rb.mass, ForceMode.Impulse);
+			}
 		}
 	}
 	void HandleGravity()
