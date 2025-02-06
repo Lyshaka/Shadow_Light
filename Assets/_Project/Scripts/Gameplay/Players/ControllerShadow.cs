@@ -26,6 +26,7 @@ public class ControllerShadow : MonoBehaviour
 	[SerializeField] Transform groundCheckTr;
 	[SerializeField] LayerMask groundLayerMask;
 	[SerializeField] LayerMask safeGroundLayerMask;
+	[SerializeField] LayerMask movingPlatformLayerMask;
 	[SerializeField] Vector3 groundCheckBoxSize;
 
 	[Header("Reset")]
@@ -37,13 +38,17 @@ public class ControllerShadow : MonoBehaviour
 	[Header("Technical")]
 	[SerializeField] Transform mesh;
 
-	bool _grounded;
-	int _inLadder;
-	bool _climbing;
 	Rigidbody rb;
+	bool _grounded;
+	PhysicsMaterial _physicsMaterial;
+
 
 	// Movement
 	float _currentHVelocity;
+
+	// Ladder
+	int _inLadder;
+	bool _climbing;
 
 	// Reset
 	bool _isResetting = false;
@@ -64,6 +69,7 @@ public class ControllerShadow : MonoBehaviour
 		rb = GetComponent<Rigidbody>();
 		rb.useGravity = false;
 		_isResetting = false;
+		_physicsMaterial = GetComponent<Collider>().material;
 	}
 
 	void Update()
@@ -73,7 +79,6 @@ public class ControllerShadow : MonoBehaviour
 		else
 		{
 			GroundCheck();
-			HandleMove();
 			HandleJump();
 			HandleClimbing();
 			HandleInteract();
@@ -83,7 +88,11 @@ public class ControllerShadow : MonoBehaviour
 	void FixedUpdate()
 	{
 		if (!_isResetting)
+		{
 			HandleGravity();
+			HandleMove();
+			HandleMovingPlatform();
+		}
 	}
 
 	void HandleReset()
@@ -96,9 +105,6 @@ public class ControllerShadow : MonoBehaviour
 
 		float s = resetScaleCurve.Evaluate(percentage);
 		mesh.localScale = new(s, s, s);
-
-		
-
 
 		if (_resetElapsedTime > resetDuration)
 		{
@@ -117,23 +123,27 @@ public class ControllerShadow : MonoBehaviour
 		
 		if (Mathf.Abs(InputActionShadow.Instance.Move) > 0f)
 		{
-			_currentHVelocity += InputActionShadow.Instance.Move * Time.deltaTime * acceleration;
-			_currentHVelocity = Mathf.Clamp( _currentHVelocity, -maxSpeed, maxSpeed);
+			_currentHVelocity += InputActionShadow.Instance.Move * Time.fixedDeltaTime * acceleration;
+			_currentHVelocity = Mathf.Clamp(_currentHVelocity, -maxSpeed, maxSpeed);
+			_physicsMaterial.staticFriction = 0f;
 		}
 		else
 		{
-			if (Mathf.Abs(_currentHVelocity) > 0f)
-				_currentHVelocity -= Time.deltaTime * deceleration * Mathf.Sign(_currentHVelocity);
+			if (Mathf.Abs(_currentHVelocity) > 0.1f)
+				_currentHVelocity -= Time.fixedDeltaTime * deceleration * Mathf.Sign(_currentHVelocity);
 			else
 				_currentHVelocity = 0f;
+			_physicsMaterial.staticFriction = 100f;
 		}
+
+		//_physicsMaterial.staticFriction = rb.linearVelocity.sqrMagnitude > 0.1f ? 0f : 100f;
 
 		Vector3 velocity = rb.linearVelocity;
 		velocity.x = _currentHVelocity;
 		rb.linearVelocity = velocity;
 
 		// Rotate the sphere according to horizontal speed
-		mesh.eulerAngles -= new Vector3(0f, 0f, (velocity.x / (mesh.localScale.x * 0.5f)) * Time.deltaTime * Mathf.Rad2Deg);
+		mesh.eulerAngles -= new Vector3(0f, 0f, (velocity.x / (mesh.localScale.x * 0.5f)) * Time.fixedDeltaTime * Mathf.Rad2Deg);
 	}
 
 	void HandleJump()
@@ -144,13 +154,19 @@ public class ControllerShadow : MonoBehaviour
 			if (_grounded || _climbing)
 			{
 				_climbing = false;
-				rb.AddForce(Vector3.up * jumpForce * rb.mass, ForceMode.Impulse);
+				rb.AddForce(jumpForce * rb.mass * Vector3.up, ForceMode.Impulse);
 			}
 		}
 	}
 	void HandleGravity()
 	{
-		if (!_climbing)
+		if (_grounded)
+		{
+			Vector3 velocity = rb.linearVelocity;
+			velocity.y = 0f;
+			rb.linearVelocity = velocity;
+		}
+		else if (!_climbing)
 		{
 			Vector3 velocity = rb.linearVelocity;
 			velocity.y -= gravityForce * Time.fixedDeltaTime;
@@ -188,8 +204,15 @@ public class ControllerShadow : MonoBehaviour
 		if (InputActionShadow.Instance.Interact)
 		{
 			InputActionShadow.Instance.Interact = false;
-			if (interactor != null)
-				interactor.Interact();
+			interactor?.Interact();
+		}
+	}
+
+	void HandleMovingPlatform()
+	{
+		if (_grounded && Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, movingPlatformLayerMask))
+		{
+			rb.linearVelocity += hit.rigidbody.GetPointVelocity(hit.point);
 		}
 	}
 

@@ -9,11 +9,13 @@ public class InputActionLight : MonoBehaviour
 	Vector2 _move;
 	float _interact;
 	float _grow;
+	bool _attach;
 
 	// Attributes
 	public Vector2 Move => _move;
 	public float Interact => _interact;
 	public float Grow => _grow;
+	public bool Attach { get => _attach; set => _attach = value; }
 
 	private void Awake()
 	{
@@ -36,6 +38,11 @@ public class InputActionLight : MonoBehaviour
 	public void OnGrow(InputValue value)
 	{
 		_grow = value.Get<float>();
+	}
+
+	public void OnAttach(InputValue value)
+	{
+		_attach = value.Get<float>() > 0f;
 	}
 
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

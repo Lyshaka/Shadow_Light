@@ -1,3 +1,4 @@
+using Codice.CM.Common.Tree;
 using UnityEngine;
 
 public class ControllerLight : MonoBehaviour
@@ -18,6 +19,10 @@ public class ControllerLight : MonoBehaviour
 	[SerializeField] Light pointLight;
 	[SerializeField] TrailRenderer trailRenderer;
 
+	[Header("Attach")]
+	[SerializeField] float attachDuration = 0.1f;
+	[SerializeField] AnimationCurve attachCurve;
+
 	[Header("Technical")]
 	[SerializeField] Transform mesh;
 
@@ -33,6 +38,16 @@ public class ControllerLight : MonoBehaviour
 	float _originalTrailSize;
 	bool _isGrowing;
 	bool _isGrown;
+
+	// Attach
+	[HideInInspector] public Transform objToAttach;
+	Rigidbody _attachRb;
+	Vector3 _attachOriginalPosition;
+	Vector3 _attachPoint;
+	float _attachElapsedTime;
+	bool _isAttached;
+	bool _isAttaching;
+	
 
 
 
@@ -58,12 +73,13 @@ public class ControllerLight : MonoBehaviour
 	{
 		HandleMove();
 		HandleGrow();
+		HandleAttach();
 	}
 
 	void HandleMove()
 	{
 		Vector3 inputVelocity = new Vector3(InputActionLight.Instance.Move.x, InputActionLight.Instance.Move.y, 0f).normalized;
-		if (inputVelocity.sqrMagnitude > 0f && !_isGrown)
+		if (inputVelocity.sqrMagnitude > 0f && !_isGrown && !_isAttaching)
 		{
 			rb.linearVelocity += acceleration * Time.fixedDeltaTime * inputVelocity;
 			rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, moveSpeedMax);
@@ -79,6 +95,9 @@ public class ControllerLight : MonoBehaviour
 				rb.linearVelocity = Vector3.zero;
 			}
 		}
+
+		if (_attachRb != null)
+			_attachRb.MovePosition(rb.position);
 	}
 
 	void HandleGrow()
@@ -113,9 +132,35 @@ public class ControllerLight : MonoBehaviour
 		}
 
 		if (_isGrowing)
-		{
 			SetLightSize(_growElapsedTime / growDuration);
+	}
+
+	void HandleAttach()
+	{
+		if (InputActionLight.Instance.Attach)
+		{
+			InputActionLight.Instance.Attach = false;
+			if (objToAttach != null && !_isAttaching)
+			{
+				if (_isAttached)
+				{
+					//objToAttach.parent = null;
+					_attachRb = null;
+					_isAttached = false;
+				}
+				else
+				{
+					Debug.Log("Attach !");
+					_attachOriginalPosition = transform.position;
+					_attachPoint = objToAttach.GetComponent<Attachable>().AttachPoint;
+					_attachElapsedTime = 0f;
+					_isAttaching = true;
+				}
+			}
 		}
+
+		if (_isAttaching)
+			Attach();
 	}
 
 	void SetLightSize(float percentage)
@@ -126,6 +171,23 @@ public class ControllerLight : MonoBehaviour
 		pointLight.range = _originalLightRange * mul * mul;
 		pointLight.intensity = _originalLightIntensity * mul* mul;
 		trailRenderer.startWidth = _originalTrailSize * mul;
+	}
+
+	void Attach()
+	{
+		if (_attachElapsedTime < attachDuration)
+		{
+			rb.MovePosition(Vector3.Lerp(_attachOriginalPosition, _attachPoint, attachCurve.Evaluate(_attachElapsedTime / attachDuration)));
+			_attachElapsedTime += Time.deltaTime;
+		}
+		else
+		{
+			rb.MovePosition(_attachPoint);
+			_isAttached = true;
+			_isAttaching = false;
+			//objToAttach.parent = transform;
+			_attachRb = objToAttach.GetComponent<Rigidbody>();
+		}
 	}
 
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

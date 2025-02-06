@@ -5103,10 +5103,13 @@ MonoBehaviour:
   groundCheckTr: {fileID: 6517993742429197147}
   groundLayerMask:
     serializedVersion: 2
-    m_Bits: 137
+    m_Bits: 2097289
   safeGroundLayerMask:
     serializedVersion: 2
     m_Bits: 9
+  movingPlatformLayerMask:
+    serializedVersion: 2
+    m_Bits: 2097152
   groundCheckBoxSize: {x: 0.25, y: 0.05, z: 0.5}
   resetDuration: 0.5
   resetCurve:
