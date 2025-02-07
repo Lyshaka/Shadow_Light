@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 3110983961918910980}
   - component: {fileID: 8412717144468815161}
   - component: {fileID: 8500682194506916608}
-  m_Layer: 0
+  m_Layer: 20
   m_Name: Lever
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -140,8 +140,6 @@ MonoBehaviour:
   angle: 50
   animationDuration: 0.2
   activatedLight: {fileID: 4416504809250667781}
-  activatedMaterialTrue: {fileID: 2100000, guid: e08457d5a1c15844a8e5e72b5c5e7969, type: 2}
-  activatedMaterialFalse: {fileID: 2100000, guid: 40f0d53fffddeda429dfdc184e38fc19, type: 2}
 --- !u!65 &8500682194506916608
 BoxCollider:
   m_ObjectHideFlags: 0

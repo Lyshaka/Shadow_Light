@@ -40,7 +40,6 @@ public class ControllerShadow : MonoBehaviour
 
 	Rigidbody rb;
 	bool _grounded;
-	PhysicsMaterial _physicsMaterial;
 
 
 	// Movement
@@ -73,7 +72,6 @@ public class ControllerShadow : MonoBehaviour
 		rb = GetComponent<Rigidbody>();
 		rb.useGravity = false;
 		_isResetting = false;
-		_physicsMaterial = GetComponent<Collider>().material;
 	}
 
 	void Update()
@@ -123,24 +121,30 @@ public class ControllerShadow : MonoBehaviour
 
 	void HandleMove()
 	{
-		
-		if (Mathf.Abs(InputActionShadow.Instance.Move) > 0f)
+		float moveInput = InputActionShadow.Instance.Move;
+
+		if (!Physics.Raycast(transform.position, new(moveInput, 0f, 0f), 0.3f, groundLayerMask))
 		{
-			_currentHVelocity += InputActionShadow.Instance.Move * Time.fixedDeltaTime * acceleration;
-			_currentHVelocity = Mathf.Clamp(_currentHVelocity, -maxSpeed, maxSpeed);
-			_physicsMaterial.staticFriction = 0f;
+			if (Mathf.Abs(moveInput) > 0f)
+			{
+				_currentHVelocity += moveInput * Time.fixedDeltaTime * acceleration;
+				_currentHVelocity = Mathf.Clamp(_currentHVelocity, -maxSpeed, maxSpeed);
+			}
+			else
+			{
+				if (Mathf.Abs(_currentHVelocity) > 0.1f)
+					_currentHVelocity -= Time.fixedDeltaTime * deceleration * Mathf.Sign(_currentHVelocity);
+				else
+					_currentHVelocity = 0f;
+			}
 		}
 		else
 		{
-			if (Mathf.Abs(_currentHVelocity) > 0.1f)
-				_currentHVelocity -= Time.fixedDeltaTime * deceleration * Mathf.Sign(_currentHVelocity);
-			else
-				_currentHVelocity = 0f;
-			_physicsMaterial.staticFriction = 100f;
+			_currentHVelocity = 0f;
 		}
 
 		if (_climbing)
-			_currentHVelocity = InputActionShadow.Instance.Move * maxSpeed * 0.4f;
+			_currentHVelocity = moveInput * maxSpeed * 0.4f;
 
 		Vector3 velocity = rb.linearVelocity;
 		velocity.x = _currentHVelocity;
@@ -270,6 +274,9 @@ public class ControllerShadow : MonoBehaviour
 				break;
 			case 19: // Kill Zone
 				Kill();
+				break;
+			case 8: // Collectable
+				other.gameObject.GetComponent<Collectable>().GetReward();
 				break;
 			default:
 				break;

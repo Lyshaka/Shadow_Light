@@ -395,8 +395,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animationDuration: 0.2
   activated: 0
-  leftSide: {fileID: 2677385614379495019}
-  rightSide: {fileID: 2394445698510346947}
+  sideA: {fileID: 2677385614379495019}
+  sideB: {fileID: 2394445698510346947}
   coll: {fileID: 9066064843299101941}
 --- !u!65 &9066064843299101941
 BoxCollider:
