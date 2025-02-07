@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 428639629343354427}
   - component: {fileID: 7678006395079359333}
+  - component: {fileID: 7831510770157087146}
   - component: {fileID: 3337727161977940068}
   - component: {fileID: 1752362369569742425}
   m_Layer: 21
@@ -49,19 +50,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pointA: {fileID: 0}
   pointB: {fileID: 0}
-  movementDuration: 3
-  movingCurve:
+--- !u!114 &7831510770157087146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3598053268577134284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9165096b87e8fa4eba94f5e734821b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movable: {fileID: 7678006395079359333}
+  moveSpeed: 2
+  moveCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0.004392696
-      outSlope: 0.004392696
+      inSlope: 0.00079719024
+      outSlope: 0.00079719024
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.36206892
+      outWeight: 1
     - serializedVersion: 3
       time: 0.5
       value: 1
@@ -74,11 +88,11 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: 0.005681046
-      outSlope: 0.005681046
+      inSlope: 0.0007973119
+      outSlope: 0.0007973119
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.28017247
+      inWeight: 1
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2

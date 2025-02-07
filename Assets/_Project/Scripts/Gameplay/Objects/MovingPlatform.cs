@@ -1,13 +1,10 @@
 using UnityEngine;
 
-public class MovingPlatform : MonoBehaviour
+public class MovingPlatform : Movable
 {
 	[SerializeField] Transform pointA;
 	[SerializeField] Transform pointB;
-	[SerializeField] float movementDuration = 10f;
-	[SerializeField] AnimationCurve movingCurve;
 
-	float _elapsedTime;
 	Rigidbody rb;
 
 	private void Start()
@@ -15,20 +12,13 @@ public class MovingPlatform : MonoBehaviour
 		rb = GetComponent<Rigidbody>();
 	}
 
-	private void Update()
+	public override float DistanceToMove()
 	{
-		//Debug.Log("Velocity : " + rb.linearVelocity);
+		return Vector3.Distance(pointA.position, pointB.position);
 	}
 
-	private void FixedUpdate()
+	public override void Move(float t)
 	{
-		Vector3 targetPosition = Vector3.Lerp(pointA.position, pointB.position, movingCurve.Evaluate(_elapsedTime / movementDuration));
-
-		if (_elapsedTime < movementDuration)
-			_elapsedTime += Time.fixedDeltaTime;
-		else
-			_elapsedTime = 0f;
-
-		rb.MovePosition(targetPosition);
+		rb.MovePosition(Vector3.Lerp(pointA.position, pointB.position, t));
 	}
 }

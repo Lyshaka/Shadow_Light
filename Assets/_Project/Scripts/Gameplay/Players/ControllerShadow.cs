@@ -50,6 +50,10 @@ public class ControllerShadow : MonoBehaviour
 	int _inLadder;
 	bool _climbing;
 
+	// Moving Platform
+	Vector3 _movingPlatformVelocity;
+	Rigidbody _movingPlatformRb;
+
 	// Reset
 	bool _isResetting = false;
 	float _resetElapsedTime = 0f;
@@ -78,9 +82,6 @@ public class ControllerShadow : MonoBehaviour
 			HandleReset();
 		else
 		{
-			GroundCheck();
-			HandleJump();
-			HandleClimbing();
 			HandleInteract();
 		}
 	}
@@ -89,9 +90,11 @@ public class ControllerShadow : MonoBehaviour
 	{
 		if (!_isResetting)
 		{
+			GroundCheck();
 			HandleGravity();
 			HandleMove();
-			HandleMovingPlatform();
+			HandleClimbing();
+			HandleJump();
 		}
 	}
 
@@ -136,11 +139,15 @@ public class ControllerShadow : MonoBehaviour
 			_physicsMaterial.staticFriction = 100f;
 		}
 
-		//_physicsMaterial.staticFriction = rb.linearVelocity.sqrMagnitude > 0.1f ? 0f : 100f;
+		if (_climbing)
+			_currentHVelocity = InputActionShadow.Instance.Move * maxSpeed * 0.4f;
 
 		Vector3 velocity = rb.linearVelocity;
 		velocity.x = _currentHVelocity;
 		rb.linearVelocity = velocity;
+
+		// Apply moving platform velocity to our rigidbody
+		rb.linearVelocity += _movingPlatformVelocity;
 
 		// Rotate the sphere according to horizontal speed
 		mesh.eulerAngles -= new Vector3(0f, 0f, (velocity.x / (mesh.localScale.x * 0.5f)) * Time.fixedDeltaTime * Mathf.Rad2Deg);
@@ -158,29 +165,29 @@ public class ControllerShadow : MonoBehaviour
 			}
 		}
 	}
+
 	void HandleGravity()
 	{
+		Vector3 velocity = rb.linearVelocity;
+
 		if (_grounded)
 		{
-			Vector3 velocity = rb.linearVelocity;
 			velocity.y = 0f;
-			rb.linearVelocity = velocity;
 		}
 		else if (!_climbing)
 		{
-			Vector3 velocity = rb.linearVelocity;
 			velocity.y -= gravityForce * Time.fixedDeltaTime;
-			rb.linearVelocity = velocity;
 		}
+
+		rb.linearVelocity = velocity;
 	}
 
 	void HandleClimbing()
 	{
 		if (_inLadder > 0)
 		{
-			if (Mathf.Abs(InputActionShadow.Instance.Climb) > 0.2f)
+			if (Mathf.Abs(InputActionShadow.Instance.Climb) > 0.5f)
 				_climbing = true;
-
 
 			if (_climbing)
 			{
@@ -208,22 +215,38 @@ public class ControllerShadow : MonoBehaviour
 		}
 	}
 
-	void HandleMovingPlatform()
-	{
-		if (_grounded && Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, movingPlatformLayerMask))
-		{
-			rb.linearVelocity += hit.rigidbody.GetPointVelocity(hit.point);
-		}
-	}
-
 	void GroundCheck()
 	{
 		_grounded = Physics.CheckBox(groundCheckTr.position, groundCheckBoxSize / 2, Quaternion.identity, groundLayerMask);
 
-		Vector3 tryPos = new(Mathf.FloorToInt(transform.position.x) + 0.5f, groundCheckTr.position.y, 0f);
+		if (_grounded)
+		{
+			// Save last safe position for reset if needed, only on safe floor
+			Vector3 tryPos = new(Mathf.FloorToInt(transform.position.x) + 0.5f, groundCheckTr.position.y, 0f);
+			if (Physics.CheckBox(tryPos, groundCheckBoxSize / 2, Quaternion.identity, safeGroundLayerMask))
+			{
+				_lastSafePosition = tryPos + Vector3.up;
+			}
 
-		if (_grounded && Physics.CheckBox(tryPos, groundCheckBoxSize / 2, Quaternion.identity, safeGroundLayerMask))
-			_lastSafePosition = tryPos + Vector3.up;
+			// Check if the platform we are standing on is moving, if yes we keep its velocity to apply to our rigidbody
+			// if not, we just reset the moving platform velocity
+			if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, movingPlatformLayerMask))
+			{
+				_movingPlatformRb = hit.rigidbody;
+				_movingPlatformVelocity = _movingPlatformRb.linearVelocity;
+			}
+			else
+			{
+				_movingPlatformRb = null;
+				_movingPlatformVelocity = Vector3.zero;
+			}
+		}
+		else
+		{
+			if (_movingPlatformRb != null)
+				_movingPlatformVelocity = _movingPlatformRb.linearVelocity;
+			_movingPlatformVelocity.y = 0f;
+		}
 	}
 
 	public void Kill()
@@ -244,6 +267,9 @@ public class ControllerShadow : MonoBehaviour
 		{
 			case 6: // Ladder
 				_inLadder++;
+				break;
+			case 19: // Kill Zone
+				Kill();
 				break;
 			default:
 				break;

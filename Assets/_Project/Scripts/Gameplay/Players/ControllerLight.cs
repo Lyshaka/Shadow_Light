@@ -8,6 +8,7 @@ public class ControllerLight : MonoBehaviour
 	// Public properties
 	[Header("Movement")]
 	[SerializeField] float moveSpeedMax = 10f;
+	[SerializeField] float moveSpeedMaxAttached = 4f;
 	[SerializeField] float acceleration = 10f;
 	[SerializeField] float deceleration = 10f;
 
@@ -25,6 +26,7 @@ public class ControllerLight : MonoBehaviour
 
 	[Header("Technical")]
 	[SerializeField] Transform mesh;
+	[SerializeField] LightableManager lightableManager;
 
 
 	// Private properties
@@ -82,7 +84,7 @@ public class ControllerLight : MonoBehaviour
 		if (inputVelocity.sqrMagnitude > 0f && !_isGrown && !_isAttaching)
 		{
 			rb.linearVelocity += acceleration * Time.fixedDeltaTime * inputVelocity;
-			rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, moveSpeedMax);
+			rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, _isAttached ? moveSpeedMaxAttached : moveSpeedMax);
 		}
 		else
 		{
@@ -132,7 +134,9 @@ public class ControllerLight : MonoBehaviour
 		}
 
 		if (_isGrowing)
+		{
 			SetLightSize(_growElapsedTime / growDuration);
+		}
 	}
 
 	void HandleAttach()
@@ -150,7 +154,7 @@ public class ControllerLight : MonoBehaviour
 				}
 				else
 				{
-					Debug.Log("Attach !");
+					//Debug.Log("Attach !");
 					_attachOriginalPosition = transform.position;
 					_attachPoint = objToAttach.GetComponent<Attachable>().AttachPoint;
 					_attachElapsedTime = 0f;
@@ -171,6 +175,7 @@ public class ControllerLight : MonoBehaviour
 		pointLight.range = _originalLightRange * mul * mul;
 		pointLight.intensity = _originalLightIntensity * mul* mul;
 		trailRenderer.startWidth = _originalTrailSize * mul;
+		lightableManager.SetColliderSize(pointLight.range / 2f);
 	}
 
 	void Attach()
@@ -186,7 +191,7 @@ public class ControllerLight : MonoBehaviour
 			_isAttached = true;
 			_isAttaching = false;
 			//objToAttach.parent = transform;
-			_attachRb = objToAttach.GetComponent<Rigidbody>();
+			_attachRb = objToAttach.GetComponentInParent<Rigidbody>();
 		}
 	}
 

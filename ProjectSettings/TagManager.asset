@@ -12,7 +12,7 @@ TagManager:
   - Water
   - UI
   - Ladder
-  - ShadowTrap
+  - Trap
   - 
   - 
   - PlayerLight
@@ -20,11 +20,11 @@ TagManager:
   - GoThroughLight
   - GoThroughShadow
   - GoThroughLightShadow
-  - ProximityCheckLight
+  - LightableManager
   - 
   - 
   - 
-  - 
+  - KillZone
   - NotGround
   - MovingPlatform
   - 
